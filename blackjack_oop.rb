@@ -1,5 +1,5 @@
 #Blackjack assignment 
-#Tim Williams 2/1/2015
+#Tim Williams 2/2/2015
 class Card 
   attr_accessor :suite, :value
   def initialize(s,v)
