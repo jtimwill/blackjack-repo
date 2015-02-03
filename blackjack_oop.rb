@@ -66,7 +66,6 @@ class Player
     end 
     hand_value 
   end 
-
 end
 
 class Human < Player
@@ -230,7 +229,6 @@ class GameEngine
     self.dealer_busted?
     check_player_status
   end
-
 
   def reset_game
     self.dealer.hand = []
