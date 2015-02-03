@@ -56,7 +56,7 @@ class Player
   end
 
   def evaluate_hand
-    hand_value = self.calculate_max_hand_value
+    hand_value = calculate_max_hand_value
     if hand_value > 21
       hand.each do |element| 
         if element.value == "A"
@@ -147,26 +147,26 @@ class GameEngine
   def complete_player_hand
     begin
       puts "Your hand is worth: #{player.evaluate_hand}"
-      self.set_player_status
+      set_player_status
     end while !/[wbs]/.match(player_status)
   end
 
   def set_player_status
     if player.evaluate_hand == 21
-      self.blackjack
+      blackjack
     elsif player.evaluate_hand > 21
-      self.player_busts
+      player_busts
     else
-      self.handle_player_choice
+      handle_player_choice
     end 
   end
 
   def handle_player_choice
     self.player_status = player.hit_or_stay?
     if player_status == "h"
-      self.player_hit
+      player_hit
     elsif player_status == "s"
-      self.player_stay
+      player_stay
     end
   end
 
@@ -216,20 +216,20 @@ class GameEngine
 
   def check_player_status
     if player_status == "w"
-      self.player_wins
+      player_wins
     elsif player_status == "b"
-      self.dealer_wins
+      dealer_wins
     elsif player.evaluate_hand > dealer.evaluate_hand
-      self.player_wins
+      player_wins
     elsif player.evaluate_hand < dealer.evaluate_hand
-      self.dealer_wins
+      dealer_wins
     else
       puts "You tied"
     end
   end
 
   def who_won?
-    self.dealer_busted?
+    dealer_busted?
     check_player_status
   end
 
@@ -250,26 +250,26 @@ class GameEngine
   end
 
   def game_sequence
-    self.reshuffle_if_necessary
+    reshuffle_if_necessary
     player.show_bank_balance
     player.get_player_bet
-    self.deal_first_four_cards
-    self.show_first_cards
-    self.complete_player_hand
-    self.complete_dealer_hand
-    self.who_won?
-    self.reset_game
+    deal_first_four_cards
+    show_first_cards
+    complete_player_hand
+    complete_dealer_hand
+    who_won?
+    reset_game
   end
 
   def game_loop
     begin
-      self.game_sequence
+      game_sequence
     end while self.play_again?.upcase == 'Y'  
   end
 
   def run
-    self.get_player_info
-    self.game_loop
+    get_player_info
+    game_loop
   end 
 end
 
