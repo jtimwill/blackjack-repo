@@ -2,10 +2,12 @@
 #Tim Williams 2/2/2015
 class Card 
   attr_accessor :suite, :value
+  
   def initialize(s,v)
     self.suite = s
     self.value = v
   end
+  
   def card_name
     value + " of " + suite
   end 
@@ -13,6 +15,7 @@ end
 
 class Decks
   attr_accessor :deck
+  
     SUITES = ["Hearts","Diamonds","Clubs","Spades"]
     VALUES = ["2","3","4","5","6","7","8","9","10","J","Q","K","A"]
 
@@ -142,10 +145,10 @@ class GameEngine
   end
 
   def complete_player_hand
-      begin
-        puts "Your hand is worth: #{player.evaluate_hand}"
-        self.set_player_status
-      end while !/[wbs]/.match(player_status)
+    begin
+      puts "Your hand is worth: #{player.evaluate_hand}"
+      self.set_player_status
+    end while !/[wbs]/.match(player_status)
   end
 
   def set_player_status
