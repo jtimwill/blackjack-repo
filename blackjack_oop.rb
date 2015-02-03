@@ -21,11 +21,11 @@ class Decks
 
   def initialize(number_of_decks)
     deck_array = SUITES.product(VALUES)
-    my_var = []
+    shoe_array = []
     for index in 0..51
-      my_var[index] = Card.new(deck_array[index][0], deck_array[index][1])
+      shoe_array[index] = Card.new(deck_array[index][0], deck_array[index][1])
     end 
-    self.deck = my_var * number_of_decks
+    self.deck = shoe_array * number_of_decks
   end 
 
   def get_card(index)
