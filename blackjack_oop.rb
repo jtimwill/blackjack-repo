@@ -1,5 +1,5 @@
 #Blackjack assignment 
-#Tim Williams 2/2/2015
+#Tim Williams 2/4/2015
 class Card 
   attr_accessor :suite, :value
   
@@ -109,14 +109,14 @@ end
 class Human < Player
   attr_accessor :bet, :choice, :worth, :name
 
-  def get_player_info  
+  def get_info  
     puts "What is your name?"
     self.name = gets.chomp
     puts "Hello, #{self.name}"
     self.worth = 500
   end 
 
-  def get_player_bet
+  def get_bet
     loop do  
       puts "How much do you want to bet?"
       player_bet = gets.chomp
@@ -146,21 +146,21 @@ class Human < Player
     self.status = "s"
   end
 
-  def player_busts 
+  def busts 
     puts "You busted"
     self.status = "b"
   end
 
-  def player_stay
+  def stay
     puts "Stay"
   end
 
-  def player_wins
+  def wins
     puts "Congratulations, you won $#{bet}"
     self.worth = worth + bet
   end
 
-  def player_loses
+  def loses
     puts "Sorry, you lost $#{bet}"
     self.worth = worth - bet
   end
@@ -170,7 +170,7 @@ class Human < Player
     puts "Your second card is: " + hand.last.card_name
   end
 
-  def player_hit(shoe_array)
+  def hit(shoe_array)
     puts "Hit me!"
     self.hand.push(shoe_array.pop)
     puts "Your new card is: " + hand.last.card_name
@@ -220,7 +220,7 @@ class GameEngine
     if player.evaluate_hand == 21
       player.blackjack
     elsif player.evaluate_hand > 21
-      player.player_busts
+      player.busts
     else
       handle_player_choice
     end 
@@ -229,21 +229,21 @@ class GameEngine
   def handle_player_choice
     player.status = player.hit_or_stay?
     if player.status == "h"
-      player.player_hit(shoe_array)
+      player.hit(shoe_array)
     elsif player.status == "s"
-      player.player_stay
+      player.stay
     end
   end
 ##############################################
   def check_player_status
-    if player.status == "w" || dealer.status == "b"
-      player.player_wins
-    elsif player.status == "b"
-      player.dealer_wins
+    if player.status == "b"
+      player.loses
+    elsif player.status == "w" || dealer.status == "b"
+      player.wins
     elsif player.evaluate_hand > dealer.evaluate_hand
-      player.player_wins
+      player.wins
     elsif player.evaluate_hand < dealer.evaluate_hand
-      player.player_loses
+      player.loses
     else
       puts "You tied"
     end
@@ -272,7 +272,7 @@ class GameEngine
   def game_sequence
     reshuffle_if_necessary
     player.show_bank_balance
-    player.get_player_bet
+    player.get_bet
     deal_first_four_cards
     show_first_cards
     complete_player_hand
@@ -288,7 +288,7 @@ class GameEngine
   end
 
   def run
-    player.get_player_info
+    player.get_info
     game_loop
   end 
 end
