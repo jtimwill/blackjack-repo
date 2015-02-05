@@ -39,7 +39,17 @@ class Decks
 end
 
 class Player
-  attr_accessor :hand
+  attr_accessor :hand, :status
+
+  def initialize
+    self.hand = []
+    self.status = ""
+  end 
+
+  def reset
+    self.hand = []
+    self.status = ""
+  end
 
   def calculate_max_hand_value
     hand_value = 0
@@ -69,10 +79,42 @@ class Player
     end 
     hand_value 
   end 
+
+  def deal_card(shoe_array)
+    self.hand.push(shoe_array.pop)
+  end
+end
+
+class Dealer < Player 
+
+  def dealer_busted? 
+    if evaluate_hand > 21 
+      self.status = "b"
+      puts "Dealer busted!"
+    end 
+  end
+
+  def complete_hand(shoe_array)
+    begin
+      self.hand.push(shoe_array.pop)
+    end while evaluate_hand < 17
+     puts "Dealer's hand value: #{evaluate_hand}"
+  end
+
+  def show_card
+    puts "The dealer's first card: " + hand.first.card_name
+  end
 end
 
 class Human < Player
   attr_accessor :bet, :choice, :worth, :name
+
+  def get_player_info  
+    puts "What is your name?"
+    self.name = gets.chomp
+    puts "Hello, #{self.name}"
+    self.worth = 500
+  end 
 
   def get_player_bet
     loop do  
@@ -98,21 +140,52 @@ class Human < Player
     end while !/[hs]/.match(user_input)
     self.choice =  user_input
   end 
+
+  def blackjack 
+    puts "Blackjack!"
+    self.status = "s"
+  end
+
+  def player_busts 
+    puts "You busted"
+    self.status = "b"
+  end
+
+  def player_stay
+    puts "Stay"
+  end
+
+  def player_wins
+    puts "Congratulations, you won $#{bet}"
+    self.worth = worth + bet
+  end
+
+  def player_loses
+    puts "Sorry, you lost $#{bet}"
+    self.worth = worth - bet
+  end
+
+  def show_cards
+    puts "Your first card is: " + hand.first.card_name
+    puts "Your second card is: " + hand.last.card_name
+  end
+
+  def player_hit(shoe_array)
+    puts "Hit me!"
+    self.hand.push(shoe_array.pop)
+    puts "Your new card is: " + hand.last.card_name
+  end 
 end
 
 class GameEngine
-  attr_accessor :player, :dealer, :shoe_array, 
-                :cut_location, :player_status
+  attr_accessor :player, :dealer, :shoe_array, :cut_location
 
   def initialize
     self.player = Human.new
-    self.player.hand = []
-    self.dealer = Player.new
-    self.dealer.hand = []
+    self.dealer = Dealer.new
     self.shoe_array = Decks.new(4)
     self.shoe_array = shoe_array.shuffle_deck
     self.cut_location = rand(52) + 52 * 2
-    self.player_status = ""
   end 
 
   def reshuffle_if_necessary
@@ -124,119 +197,66 @@ class GameEngine
     end 
   end
 
-  def get_player_info
-    puts "What is your name?"
-    self.player.name = gets.chomp
-    puts "Hello, #{player.name}"
-    self.player.worth = 500
-  end 
-
   def deal_first_four_cards
-    self.player.hand.push(self.shoe_array.pop)
-    self.dealer.hand.push(self.shoe_array.pop)
-    self.player.hand.push(self.shoe_array.pop)
-    self.dealer.hand.push(self.shoe_array.pop)
+    player.deal_card(shoe_array)
+    dealer.deal_card(shoe_array)
+    player.deal_card(shoe_array)
+    dealer.deal_card(shoe_array)
   end
 
   def show_first_cards
-    puts "Your first card is: " + player.hand.first.card_name
-    puts "Your second card is: " + player.hand.last.card_name
-    puts "The dealer's first card: " + dealer.hand.first.card_name
+    player.show_cards
+    dealer.show_card
   end
-
+############################################FIX THIS
   def complete_player_hand
     begin
       puts "Your hand is worth: #{player.evaluate_hand}"
       set_player_status
-    end while !/[wbs]/.match(player_status)
+    end while !/[wbs]/.match(player.status)
   end
 
-  def set_player_status
+  def set_player_status 
     if player.evaluate_hand == 21
-      blackjack
+      player.blackjack
     elsif player.evaluate_hand > 21
-      player_busts
+      player.player_busts
     else
       handle_player_choice
     end 
   end
 
   def handle_player_choice
-    self.player_status = player.hit_or_stay?
-    if player_status == "h"
-      player_hit
-    elsif player_status == "s"
-      player_stay
+    player.status = player.hit_or_stay?
+    if player.status == "h"
+      player.player_hit(shoe_array)
+    elsif player.status == "s"
+      player.player_stay
     end
   end
-
-  def blackjack
-    puts "Blackjack!"
-    self.player_status = "s"
-  end
-
-  def player_busts
-    puts "You busted"
-    self.player_status = "b"
-  end
-
-  def player_stay
-    puts "Stay"
-  end
-
-  def player_hit
-    puts "Hit me!"
-    self.player.hand.push(self.shoe_array.pop)
-    puts "Your new card is: " + player.hand.last.card_name
-  end 
-
-  def complete_dealer_hand
-    begin
-      self.dealer.hand.push(self.shoe_array.pop)
-    end while dealer.evaluate_hand < 17
-     puts "Dealer's hand value: #{dealer.evaluate_hand}"
-  end
-
-  def dealer_busted?
-    if dealer.evaluate_hand > 21 && player_status != "b"
-      self.player_status = "w"
-      puts "Dealer busted!"
-    end 
-  end
-
-  def player_wins
-    puts "Congratulations, you won $#{player.bet}"
-    self.player.worth = player.worth + player.bet
-  end
-
-  def dealer_wins
-    puts "Sorry, you lost $#{player.bet}"
-    self.player.worth = player.worth - player.bet
-  end
-
+##############################################
   def check_player_status
-    if player_status == "w"
-      player_wins
-    elsif player_status == "b"
-      dealer_wins
+    if player.status == "w" || dealer.status == "b"
+      player.player_wins
+    elsif player.status == "b"
+      player.dealer_wins
     elsif player.evaluate_hand > dealer.evaluate_hand
-      player_wins
+      player.player_wins
     elsif player.evaluate_hand < dealer.evaluate_hand
-      dealer_wins
+      player.player_loses
     else
       puts "You tied"
     end
   end
 
   def who_won?
-    dealer_busted?
+    dealer.dealer_busted?
     check_player_status
   end
 
   def reset_game
-    self.dealer.hand = []
-    self.player.hand = []
-    self.player_status = ""
+    player.reset
+    dealer.reset
   end
 
   def play_again?
@@ -256,7 +276,7 @@ class GameEngine
     deal_first_four_cards
     show_first_cards
     complete_player_hand
-    complete_dealer_hand
+    dealer.complete_hand(shoe_array)
     who_won?
     reset_game
   end
@@ -268,7 +288,7 @@ class GameEngine
   end
 
   def run
-    get_player_info
+    player.get_player_info
     game_loop
   end 
 end
